@@ -46,7 +46,7 @@ while ret:
             detections_ = np.asarray(detections_)
 
         # track vehicles
-        track_ids = mot_tracker.update(detections_, None)
+        track_ids = mot_tracker.update(detections_[:, :5])
 
         # detect license plates
         license_plates = license_plate_detector(frame)[0]
