@@ -1,0 +1,18 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="asn1crypto" />
+          <option value="click" />
+          <option value="cryptography" />
+          <option value="gplaycli" />
+          <option value="lxml" />
+          <option value="matlink-gpapi" />
+          <option value="pyaxmlparser" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
