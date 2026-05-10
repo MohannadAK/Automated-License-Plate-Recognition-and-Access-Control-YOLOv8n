@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: alpr
+Version: 0.1.0
+Summary: Automatic License Plate Recognition with YOLOv8n and Access Control
+Requires-Python: >=3.8

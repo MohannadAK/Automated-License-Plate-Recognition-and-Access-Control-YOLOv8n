@@ -1,1 +1,20 @@
+# Environment secrets
 .env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+
+# IDE
+.idea/
+
+# Generated CSVs (test.csv, test_interpolated.csv are runtime outputs)
+data/csv/
+
+# Database (generated at runtime)
+data/database/*.db

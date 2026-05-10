@@ -1,0 +1,11 @@
+pyproject.toml
+alpr.egg-info/PKG-INFO
+alpr.egg-info/SOURCES.txt
+alpr.egg-info/dependency_links.txt
+alpr.egg-info/top_level.txt
+src/__init__.py
+src/core/__init__.py
+src/core/sort.py
+src/core/util.py
+src/services/__init__.py
+src/services/license_plate_service.py
