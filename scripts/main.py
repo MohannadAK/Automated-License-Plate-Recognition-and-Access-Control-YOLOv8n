@@ -178,7 +178,7 @@ def main(video_path='data/videos/sample.mp4', output_path='data/videos/out.mp4')
             x1, y1, x2, y2 = ast.literal_eval(row_data['license_plate_bbox'].replace('[ ', '[').replace('   ', ' ').replace('  ', ' ').replace(' ', ','))
             license_crop = frame[int(y1):int(y2), int(x1):int(x2), :]
             if license_crop.size > 0:
-                license_crop = cv2.resize(license_crop, (int((x2 - x1) * 400 / (y2 - y1)), 400))
+                license_crop = cv2.resize(license_crop, (int((x2 - x1) * 150 / (y2 - y1)), 150))
                 license_plate[car_id]['license_crop'] = license_crop
 
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -212,42 +212,57 @@ def main(video_path='data/videos/sample.mp4', output_path='data/videos/out.mp4')
                     license_crop = license_plate[car_id]['license_crop']
                     if license_crop is not None:
                         H, W, _ = license_crop.shape
+                        UI_HEIGHT = H + 100
 
-                        # Paste cropped plate
-                        frame[int(car_y1) - H - 100:int(car_y1) - 100,
-                              int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = license_crop
+                        # Calculate Y placement: Above car, Below car, or Clamped to top
+                        if int(car_y1) > UI_HEIGHT + 50:
+                            ui_y = int(car_y1) - UI_HEIGHT - 50
+                        elif frame.shape[0] - int(car_y2) > UI_HEIGHT + 50:
+                            ui_y = int(car_y2) + 50
+                        else:
+                            ui_y = 50  # Clamp to top if car fills the screen
 
-                        # Prepare text banner
+                        crop_y = ui_y
+                        text_bg_y = crop_y + H
+                        text_y = text_bg_y + 70
+
+                        # Center X coordinates
+                        center_x = int((car_x2 + car_x1) / 2)
+                        start_x = max(0, center_x - int(W / 2))
+                        end_x = start_x + W
+
+                        # Ensure we don't go out of bounds on the X axis
+                        if end_x > frame.shape[1]:
+                            end_x = frame.shape[1]
+                            start_x = end_x - W
+
+                        # 1. Paste cropped plate
+                        frame[crop_y:crop_y + H, start_x:end_x, :] = license_crop
+
+                        # Prepare text
                         plate_text = license_plate[car_id]['license_plate_number']
                         auth_text = "AUTHORIZED" if is_authorized else "UNAUTHORIZED"
                         display_text = f"{plate_text} - {auth_text}"
+                        (text_width, text_height), _ = cv2.getTextSize(display_text, cv2.FONT_HERSHEY_SIMPLEX, 1.5, 5)
 
-                        (text_width, text_height), _ = cv2.getTextSize(display_text, cv2.FONT_HERSHEY_SIMPLEX, 2.5, 12)
-
-                        # Paste white banner behind text
-                        frame[int(car_y1) - H - 350:int(car_y1) - H - 100,
-                              int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = (255, 255, 255)
-
-                        # Banner fill color based on auth
-                        text_x = int((car_x2 + car_x1 - text_width) / 2)
-                        text_y = int(car_y1 - H - 150)
-                        
-                        # Add a colored backdrop box for the text to improve contrast
+                        # 2. Draw colored background for text
+                        text_start_x = center_x - int(text_width / 2)
                         cv2.rectangle(frame, 
-                                      (text_x - 20, text_y - text_height - 20),
-                                      (text_x + text_width + 20, text_y + 20),
+                                      (text_start_x - 20, text_bg_y),
+                                      (text_start_x + text_width + 20, text_bg_y + 100),
                                       box_color, 
                                       -1)
 
-                        # Draw Text (black text on green/red backdrop)
+                        # 3. Draw Text
                         cv2.putText(frame,
                                     display_text,
-                                    (text_x, text_y),
+                                    (text_start_x, text_y),
                                     cv2.FONT_HERSHEY_SIMPLEX,
-                                    2.5,
+                                    1.5,
                                     (0, 0, 0) if is_authorized else (255, 255, 255),
-                                    12)
+                                    5)
                 except Exception as e:
+                    print(f"Error drawing UI for car {car_id}: {e}")
                     # Failsafe if bounding box calculations fall outside frame limits
                     pass
 
@@ -265,4 +280,5 @@ def main(video_path='data/videos/sample.mp4', output_path='data/videos/out.mp4')
     return results
 
 if __name__ == '__main__':
-    results = main('data/videos/sample2.mp4', 'data/videos/out.mp4')
+    for i in range(2):
+        results = main(f'data/videos/sample{i + 1}.mp4', f'data/videos/out{i + 1}.mp4')

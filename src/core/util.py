@@ -1,5 +1,6 @@
 import string
 import easyocr
+import re
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=True)
@@ -121,6 +122,7 @@ def read_license_plate(license_plate_crop):
     for detection in detections:
         bbox, text, score = detection
         text = text.upper().replace(' ', '')
+        text = re.sub(r'[^A-Z0-9]', '', text)
 
         # TEMPORARILY BYPASS THE STRICT FORMAT CHECK
         # if license_complies_format(text):
